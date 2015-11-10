@@ -6,9 +6,11 @@
 
 var jimp = require("jimp");
 var program = require('commander');
+var colors = require('colors');
 var path = require('path');
 var recursive = require('recursive-readdir');
 var mkdirp = require('mkdirp');
+var asynch = require('async')
 var changeCase = require('change-case');
 var systems = {
   android: require('./systems/android.js'),
@@ -25,7 +27,7 @@ program
   .option('-s, --ios', 'generates assets for iOS projects')
   .option('-a, --android', 'generates assets for Android projects')
   .option('-d, --dpi [dpi]', 'density of original HD assets (can be "@3x", "@2x", "ldpi" to "xxxdpi" or an integer in dpi)', 'xxxhdpi')
-  .option('-o, --output [ouput]', 'the output folder where all generated assets will be created', './assets-output/')
+  .option('-o, --output [ouput]', 'the output folder where all generated assets will be created', './assets/')
   .option('-i, --input [input]', 'the input folder that contains all the original HD assets', './')
   .parse(process.argv);
 
@@ -34,8 +36,12 @@ program
  */
 
 for(var s in systems) {
-  var converter = systems[s];
+  if(program[s]) {
+    var system = systems[s];
+    convertAssets(program.input,program.dpi,program.output,system,function(err) {
 
+    });
+  }
 }
 
  /*
@@ -52,6 +58,8 @@ function convertAssets(pathIn, density, pathOut, system, callback) {
      return;
    }
 
+   var batchJobs = [];
+
    for (var i in files) {
      var inFile = files[i];
      if(path.extname(inFile) === '.png'){
@@ -63,20 +71,25 @@ function convertAssets(pathIn, density, pathOut, system, callback) {
             outFile = path.join(pathOut,outFile);
 
             if(densityValue <= density) {
-              console.log( inFile  + ' ('+ density +' ppi)' + " > " + outFile + ' ('+ densityValue +' ppi)');
-              convertAsset(inFile,density,outFile,densityValue,function(err) {
-
-
+              batchJobs.push({
+                imgPathIn: inFile,
+                dpiIn: density,
+                imgPathOut: outFile,
+                dpiOut: densityValue
               });
             }
             else {
-              console.log( "Not generated - output density is higher that input one : " + inFile  + ' ('+ density +' ppi)' + " > " + outFile + ' ('+ densityValue +' ppi)');
+              console.log(("Ignored - output density is higher that input one : " + inFile  + ' ('+ density +' ppi)' + " > " + outFile + ' ('+ densityValue +' ppi)').yellow);
             }
        }
      }
    }
 
-   callback();
+   asynch.map(batchJobs, function(opt,cb) {
+        console.log(('Conversion ('+ opt.dpiIn +' ppi > '+ opt.dpiOut +' ppi) : ').cyan +opt.imgPathIn + " > " + opt.imgPathOut);
+        convertAsset(opt.imgPathIn,opt.dpiIn,opt.imgPathOut,opt.dpiOut,cb);
+    }, callback);
+
  });
 }
 
@@ -144,8 +157,6 @@ function convertAsset(imgPathIn, dpiIn, imgPathOut, dpiOut, callback) {
             callback(e)
           }
       });
-
-
   });
 
 }
