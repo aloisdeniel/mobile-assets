@@ -1,0 +1,33 @@
+{
+  "name": "mobile-assets",
+  "version": "1.0.0",
+  "description": "0.0.1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aloisdeniel/mobile-assets.git"
+  },
+  "keywords": [
+    "mobile",
+    "assets",
+    "images",
+    "conversion",
+    "density"
+  ],
+  "author": "Aloïs Deniel",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aloisdeniel/mobile-assets/issues"
+  },
+  "homepage": "https://github.com/aloisdeniel/mobile-assets#readme",
+  "dependencies": {
+    "change-case": "^2.3.0",
+    "commander": "^2.9.0",
+    "jimp": "^0.2.19",
+    "mkdirp": "^0.5.1",
+    "recursive-readdir": "^1.3.0"
+  }
+}
