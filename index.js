@@ -35,12 +35,16 @@ program
  * Program execution
  */
 
-for(var s in systems) {
-  if(program[s]) {
-    var system = systems[s];
-    convertAssets(program.input,program.dpi,program.output,system,function(err) {
+if(require.main === module) {
+  var allSystems = !(program.android || program.ios || program.windows);
 
-    });
+  for(var s in systems) {
+   if(allSystems || program[s]) {
+     var system = systems[s];
+     convertAssets(program.input,program.dpi,program.output,system,function(err) {
+
+     });
+   }
   }
 }
 
@@ -86,7 +90,7 @@ function convertAssets(pathIn, density, pathOut, system, callback) {
    }
 
    asynch.map(batchJobs, function(opt,cb) {
-        console.log(('Conversion ('+ opt.dpiIn +' ppi > '+ opt.dpiOut +' ppi) : ').cyan +opt.imgPathIn + " > " + opt.imgPathOut);
+        console.log(('[' + opt.imgPathIn + ']('+ opt.dpiIn +' ppi > '+ opt.dpiOut +' ppi) : ').cyan + opt.imgPathOut);
         convertAsset(opt.imgPathIn,opt.dpiIn,opt.imgPathOut,opt.dpiOut,cb);
     }, callback);
 
@@ -136,7 +140,7 @@ function flattenName(folderPath, imagePath) {
  */
 function convertAsset(imgPathIn, dpiIn, imgPathOut, dpiOut, callback) {
 
-  var scale = dpiOut / dpiIn;
+  var scale = dpiOut / (1.0 * dpiIn);
 
   mkdirp(path.dirname(imgPathOut), function (err) {
     if (err) {
