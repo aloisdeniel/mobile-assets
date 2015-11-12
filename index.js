@@ -66,26 +66,36 @@ function convertAssets(pathIn, density, pathOut, system, callback) {
 
    for (var i in files) {
      var inFile = files[i];
-     if(path.extname(inFile) === '.png'){
-       var flatname = path.join(pathOut, flattenName(pathIn,inFile));
-
-       for(var densityPath in system.densities) {
-            var densityValue = system.densities[densityPath];
-            var outFile = densityPath.replace('{name}', path.basename(flatname,path.extname(flatname)));
-            outFile = path.join(pathOut,outFile);
-
-            if(densityValue <= density) {
-              batchJobs.push({
-                imgPathIn: inFile,
-                dpiIn: density,
-                imgPathOut: outFile,
-                dpiOut: densityValue
-              });
-            }
-            else {
-              console.log(("Ignored - output density is higher that input one : " + inFile  + ' ('+ density +' ppi)' + " > " + outFile + ' ('+ densityValue +' ppi)').yellow);
-            }
+       if(path.basename(inFile) === 'appicon.png') {
+         system.createIcon(inFile,pathOut,true,function(err){
+           if(err){
+           console.log("failed to generate app icon : ".red + err);
+           }
+         });
        }
+       else if(path.extname(inFile) === '.png') {
+         var relative = path.relative(pathIn,inFile);
+         var flatname = system.createResourceName(relative);
+
+         for(var densityPath in system.densities) {
+              var densityValue = system.densities[densityPath];
+              var camelCaseName = path.basename(flatname,path.extname(flatname));
+              var outFile = densityPath.replace('{camelcase}', camelCaseName);
+              outFile = outFile.replace('{lowercase}', camelCaseName.toLowerCase());
+              outFile = path.join(pathOut,outFile);
+
+              if(densityValue <= density) {
+                batchJobs.push({
+                  imgPathIn: inFile,
+                  dpiIn: density,
+                  imgPathOut: outFile,
+                  dpiOut: densityValue
+                });
+              }
+              else {
+                console.log(("Ignored - output density is higher that input one : " + inFile  + ' ('+ density +' ppi)' + " > " + outFile + ' ('+ densityValue +' ppi)').yellow);
+              }
+         }
      }
    }
 
@@ -110,29 +120,6 @@ function parseDensity(parameter) {
   if(parameter === 'xxhdpi') return 480;
   if(parameter === 'xxxhdpi') return 640;
   return parseInt(parameter);
-}
-
-/*
- * Flattens an image from its path to a unique single level file.
- * Example : "/a/b/c d/e/f g h.png" > "[a-b-cD-e]fGH.png"
- */
-function flattenName(folderPath, imagePath) {
-
-  var result = '';
-  var parsed = path.parse(imagePath);
-  var relative = path.relative(folderPath,parsed.dir);
-  var splits = relative.split(path.sep).filter(n => n.length > 0);
-
-  for(var i = 0; i < splits.length; i++) {
-    if(i == 0) { result += "["; }
-    else { result += "-"; }
-    result += changeCase.camelCase(splits[i]);
-  }
-
-  if(result.length > 0) { result += "]"; }
-
-  return result + changeCase.camelCase(parsed.name)  + parsed.ext;
-
 }
 
 /*
@@ -162,7 +149,6 @@ function convertAsset(imgPathIn, dpiIn, imgPathOut, dpiOut, callback) {
           }
       });
   });
-
 }
 
 /*
@@ -173,6 +159,5 @@ function convertAsset(imgPathIn, dpiIn, imgPathOut, dpiOut, callback) {
    systems: systems,
    convertAssets: convertAssets,
    convertAsset: convertAsset,
-   flattenName: flattenName,
    parseDensity: parseDensity
  }
