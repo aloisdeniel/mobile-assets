@@ -1,2 +1,5 @@
 # mobile-assets
-A tool for generating and converting assets for al major mobile platforms.
+
+![Mobile Assets Logo](logo.png)
+
+A tool for generating and converting assets for all major mobile platforms.

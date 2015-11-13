@@ -6,7 +6,7 @@ var jimp = require("jimp");
 var path = require('path');
 var changeCase = require('change-case');
 
-function createIcon(originalPath, outputFolder, transparent, callback) {
+function createIcon(originalPath, outputFolder, foregroundColor, backgroundColor, callback) {
 
 
 

@@ -67,7 +67,7 @@ function convertAssets(pathIn, density, pathOut, system, callback) {
    for (var i in files) {
      var inFile = files[i];
        if(path.basename(inFile) === 'appicon.png') {
-         system.createIcon(inFile,pathOut,true,function(err){
+         system.createIcon(inFile,pathOut,"#ffffff", "#f3a62d",function(err){
            if(err){
            console.log("failed to generate app icon : ".red + err);
            }
