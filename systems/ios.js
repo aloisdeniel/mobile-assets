@@ -6,12 +6,18 @@ var jimp = require("jimp");
 var path = require('path');
 var changeCase = require('change-case');
 
+/*
+ * Creates an icon from a mask logo.
+ */
 function createIcon(originalPath, outputFolder, foregroundColor, backgroundColor, callback) {
 
 
 
 }
 
+/*
+ * Creates a compatible resource name from original image path.
+ */
 function createResourceName(originalPath) {
   var result = '';
   var parsed = path.parse(originalPath);
@@ -30,7 +36,7 @@ function createResourceName(originalPath) {
 module.exports = {
   createIcon: createIcon,
   createResourceName: createResourceName,
-  densities: {
+  assets: {
     "/{camelcase}@2x.png" : 264,
     "/{camelcase}@3x.png" : 401
   }

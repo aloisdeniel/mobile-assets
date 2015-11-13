@@ -67,9 +67,29 @@ function convertAssets(pathIn, density, pathOut, system, callback) {
    for (var i in files) {
      var inFile = files[i];
        if(path.basename(inFile) === 'appicon.png') {
-         system.createIcon(inFile,pathOut,"#ffffff", "#f3a62d",function(err){
+
+         system.createIcon(inFile,"#ffffff", "#f3a62d",function(err,icon){
            if(err){
-           console.log("failed to generate app icon : ".red + err);
+             console.log("failed to generate app icon : ".red + err);
+           }
+           else if(icon){
+             var iconJobs = [];
+
+             for (var iconSizePath in system.icons) {
+                var value = system.icons[iconSizePath];
+                var outFile = formatName(pathOut,iconSizePath,"appicon");
+
+                iconJobs.push({
+                  imgIn: icon,
+                  dpiIn: density,
+                  imgPathOut: outFile,
+                  convertParams: value
+                });
+             }
+
+             asynch.map(iconJobs, function(opt,cb) {
+                  convertAsset(opt.imgIn,opt.dpiIn,opt.imgPathOut,opt.convertParams,cb);
+              }, callback);
            }
          });
        }
@@ -77,34 +97,35 @@ function convertAssets(pathIn, density, pathOut, system, callback) {
          var relative = path.relative(pathIn,inFile);
          var flatname = system.createResourceName(relative);
 
-         for(var densityPath in system.densities) {
-              var densityValue = system.densities[densityPath];
-              var camelCaseName = path.basename(flatname,path.extname(flatname));
-              var outFile = densityPath.replace('{camelcase}', camelCaseName);
-              outFile = outFile.replace('{lowercase}', camelCaseName.toLowerCase());
-              outFile = path.join(pathOut,outFile);
+         for(var assetPath in system.assets) {
+              var value = system.assets[assetPath];
+              var outFile = formatName(pathOut,assetPath,flatname);
 
-              if(densityValue <= density) {
-                batchJobs.push({
-                  imgPathIn: inFile,
-                  dpiIn: density,
-                  imgPathOut: outFile,
-                  dpiOut: densityValue
-                });
-              }
-              else {
-                console.log(("Ignored - output density is higher that input one : " + inFile  + ' ('+ density +' ppi)' + " > " + outFile + ' ('+ densityValue +' ppi)').yellow);
-              }
+              batchJobs.push({
+                imgIn: inFile,
+                dpiIn: density,
+                imgPathOut: outFile,
+                convertParams: value
+              });
          }
      }
    }
 
    asynch.map(batchJobs, function(opt,cb) {
-        console.log(('[' + opt.imgPathIn + ']('+ opt.dpiIn +' ppi > '+ opt.dpiOut +' ppi) : ').cyan + opt.imgPathOut);
-        convertAsset(opt.imgPathIn,opt.dpiIn,opt.imgPathOut,opt.dpiOut,cb);
+        convertAsset(opt.imgIn,opt.dpiIn,opt.imgPathOut,opt.convertParams,cb);
     }, callback);
 
  });
+}
+
+/*
+ * Replace {lowercase},  or {camelcase} in template with corresponding value.
+ */
+function formatName(rootFolder,template,filePath) {
+  var name = path.basename(filePath,path.extname(filePath));
+  var outFile = template.replace('{camelcase}', name);
+  outFile = outFile.replace('{lowercase}', name.toLowerCase());
+  return path.join(rootFolder,outFile);
 }
 
 /*
@@ -125,31 +146,68 @@ function parseDensity(parameter) {
 /*
  * Converts an asset from a density to another.
  */
-function convertAsset(imgPathIn, dpiIn, imgPathOut, dpiOut, callback) {
+function convertAsset(imgIn, dpiIn, imgPathOut, convertParams, callback) {
 
-  var scale = dpiOut / (1.0 * dpiIn);
+    mkdirp(path.dirname(imgPathOut), function (err) {
+      if (err) {
+        callback(err);
+        return;
+      }
 
-  mkdirp(path.dirname(imgPathOut), function (err) {
-    if (err) {
-      callback(err);
-      return;
-    }
+      // If imgPathIn isn't a jimp image instance, we need to load an image
 
-      jimp.read(imgPathIn, function (err, img) {
-          if (err) {
-            callback(err);
-            return;
-          }
+      if((typeof imgIn) === 'string') {
+          jimp.read(imgIn, function (err, img) {
+              if (err) {
+                callback(err);
+                return;
+              }
+              try {
+                writeImage(img,dpiIn,imgPathOut,convertParams);
+                callback();
+
+              } catch (e) {
+                console.log(('FAILED : ').red + e);
+                callback(e)
+              }
+          });
+        }
+        else {
           try {
-            img.scale(scale)
-               .write(imgPathOut);
-               callback()
+            writeImage(imgIn,dpiIn,imgPathOut,convertParams);
+            callback();
+
           } catch (e) {
+            console.log(('FAILED : ').red + e);
             callback(e)
           }
-      });
-  });
+        }
+    });
 }
+
+/*
+ * Writes an image with the given size or scale.
+ */
+function writeImage(img, dpiIn, imgPathOut, sizeParams) {
+
+  if(Array.isArray(sizeParams)) {
+    // Resizing
+    img.clone().resize(sizeParams[0],sizeParams[1]).write(imgPathOut);
+    console.log(('('+ sizeParams[0] + 'x' + sizeParams[1] +' px) : ').cyan + imgPathOut);
+  }
+  else {
+    if(dpiIn >= sizeParams) {
+      //Scaling
+      var scale = sizeParams / (1.0 * dpiIn);
+      img.clone().scale(scale).write(imgPathOut);
+      console.log(('('+ dpiIn +' ppi > '+ sizeParams +' ppi) : ').cyan + imgPathOut);
+    }
+    else {
+      console.log(("Ignored - output density is higher that input one : " ).yellow + imgPathOut);
+    }
+  }
+}
+
 
 /*
  * Module exports
