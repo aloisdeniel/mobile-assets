@@ -26,6 +26,8 @@ program
   .option('-w, --windows', 'generates assets for Windows projects')
   .option('-s, --ios', 'generates assets for iOS projects')
   .option('-a, --android', 'generates assets for Android projects')
+  .option('-b, --iconBackgroundColor [iconBackgroundColor]', 'the background color for the generated icon', "#54c5ef")
+  .option('-f, --iconForegroundColor [iconForegroundColor]', 'the foreground color for the generated icon', "#ffffff")
   .option('-d, --dpi [dpi]', 'density of original HD assets (can be "@3x", "@2x", "ldpi" to "xxxdpi" or an integer in dpi)', 'xxxhdpi')
   .option('-o, --output [ouput]', 'the output folder where all generated assets will be created', './assets/')
   .option('-i, --input [input]', 'the input folder that contains all the original HD assets', './')
@@ -41,7 +43,7 @@ if(require.main === module) {
   for(var s in systems) {
    if(allSystems || program[s]) {
      var system = systems[s];
-     convertAssets(program.input,program.dpi,program.output,system,function(err) {
+     convertAssets(program.input, program.dpi, program.output,system, program.iconForegroundColor, program.iconBackgroundColor, function(err) {
 
      });
    }
@@ -51,7 +53,7 @@ if(require.main === module) {
  /*
   * Converts all assets in a folder for a given system.
   */
-function convertAssets(pathIn, density, pathOut, system, callback) {
+function convertAssets(pathIn, density, pathOut, system, iconForegroundColor, iconBackgroundColor, callback) {
 
  density = parseDensity(density)
 
@@ -68,7 +70,7 @@ function convertAssets(pathIn, density, pathOut, system, callback) {
      var inFile = files[i];
        if(path.basename(inFile) === 'appicon.png') {
 
-         system.createIcon(inFile,"#ffffff", "#f3a62d",function(err,icon){
+         system.createIcon(inFile,iconForegroundColor, iconBackgroundColor,function(err,icon){
            if(err){
              console.log("failed to generate app icon : ".red + err);
            }
