@@ -14,8 +14,9 @@ var asynch = require('async')
 var changeCase = require('change-case');
 var systems = {
   android: require('./systems/android.js'),
-  ios: require('./systems/ios.js')
-}
+  ios: require('./systems/ios.js'),
+  windows: require('./systems/windows.js')
+};
 
 /*
  * Program commands
@@ -127,6 +128,7 @@ function formatName(rootFolder,template,filePath) {
   var name = path.basename(filePath,path.extname(filePath));
   var outFile = template.replace('{camelcase}', name);
   outFile = outFile.replace('{lowercase}', name.toLowerCase());
+  outFile = outFile.replace('{pascalcase}', changeCase.camelCase(name));
   return path.join(rootFolder,outFile);
 }
 
@@ -185,13 +187,12 @@ function convertAsset(imgIn, dpiIn, imgPathOut, convertParams, callback) {
           }
         }
     });
-}
+};
 
 /*
  * Writes an image with the given size or scale.
  */
 function writeImage(img, dpiIn, imgPathOut, sizeParams) {
-
   if(Array.isArray(sizeParams)) {
     // Resizing
     img.clone().resize(sizeParams[0],sizeParams[1]).write(imgPathOut);
@@ -208,8 +209,7 @@ function writeImage(img, dpiIn, imgPathOut, sizeParams) {
       console.log(("Ignored - output density is higher that input one : " ).yellow + imgPathOut);
     }
   }
-}
-
+};
 
 /*
  * Module exports

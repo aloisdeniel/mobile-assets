@@ -37,7 +37,7 @@ function createIcon(originalPath, foregroundColor, backgroundColor, callback) {
       }
     });
   });
-}
+};
 
 /*
  * Creates a compatible resource name from original image path.
@@ -56,6 +56,10 @@ function createResourceName(originalPath) {
 
   return result + changeCase.camelCase(parsed.name);
 }
+
+/*
+* Exposing module.
+*/
 
 module.exports = {
   createIcon: createIcon,
