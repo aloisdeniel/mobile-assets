@@ -195,7 +195,7 @@ function convertAsset(imgIn, dpiIn, imgPathOut, convertParams, callback) {
 function writeImage(img, dpiIn, imgPathOut, sizeParams) {
   if(Array.isArray(sizeParams)) {
     // Resizing
-    img.clone().resize(sizeParams[0],sizeParams[1]).write(imgPathOut);
+    img.clone().contain(sizeParams[0],sizeParams[1]).write(imgPathOut);
     console.log(('('+ sizeParams[0] + 'x' + sizeParams[1] +' px) : ').cyan + imgPathOut);
   }
   else {

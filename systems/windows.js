@@ -1,6 +1,6 @@
 /*
- * Dependencies
- */
+* Dependencies
+*/
 
 var jimp = require("jimp");
 var path = require('path');
@@ -8,26 +8,43 @@ var changeCase = require('change-case');
 var colorUtils = require('../colors-utils.js');
 
 /*
- * Creates an icon from a mask logo.
- */
+* Creates an icon from a mask logo.
+*/
 function createIcon(originalPath, foregroundColor, backgroundColor, callback) {
-    jimp.read(originalPath, function (err, foreground) {
+
+  var offset = 512;
+
+  jimp.read(originalPath, function (err, foreground) {
+
+    if (err) {
+      callback(err);
+      return;
+    }
+    var iconSize = 512;
+
+    var size = iconSize + 2*offset;
+
+    new jimp(size, size, function (err, background) {
       if (err) {
         callback(err);
         return;
       }
+
       try {
-        colorUtils.colorize(foreground.resize(1024,1024),foregroundColor);
-        callback(null,foreground)
+        colorUtils.colorize(foreground.resize(iconSize,iconSize),foregroundColor);
+        var icon = background.composite(foreground, offset, offset);
+        callback(null,icon)
       } catch (e) {
-        callback(e)
+        callback(e);
       }
     });
+  });
+
 };
 
 /*
- * Creates a compatible resource name from original image path.
- */
+* Creates a compatible resource name from original image path.
+*/
 function createResourceName(originalPath) {
   var result = '';
   var parsed = path.parse(originalPath);
