@@ -1,7 +1,7 @@
 {
-  "name": "mobile-assets",
-  "version": "1.0.0",
-  "description": "0.0.1",
+  "name": "mobile-toolbelt-assets",
+  "version": "0.0.1",
+  "description": "A tool for generating and converting image assets for all major mobile platforms.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
