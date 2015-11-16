@@ -16,6 +16,7 @@ function createIcon(originalPath, foregroundColor, backgroundColor, callback) {
 
   jimp.read(originalPath, function (err, foreground) {
 
+
     if (err) {
       callback(err);
       return;
@@ -24,7 +25,9 @@ function createIcon(originalPath, foregroundColor, backgroundColor, callback) {
 
     var size = iconSize + 2*offset;
 
-    new jimp(size, size, function (err, background) {
+    var foregroundHex = colorUtils.createHex(foregroundColor);
+
+    new jimp(size, size, foregroundHex, function (err, background) {
       if (err) {
         callback(err);
         return;

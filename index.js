@@ -194,9 +194,20 @@ function convertAsset(imgIn, dpiIn, imgPathOut, convertParams, callback) {
  */
 function writeImage(img, dpiIn, imgPathOut, sizeParams) {
   if(Array.isArray(sizeParams)) {
-    // Resizing
-    img.clone().contain(sizeParams[0],sizeParams[1]).write(imgPathOut);
-    console.log(('('+ sizeParams[0] + 'x' + sizeParams[1] +' px) : ').cyan + imgPathOut);
+
+    var w = sizeParams[0];
+    var h = sizeParams[1];
+
+    if(w !== h) {
+      // Resizing
+      img.clone().resize(w,w).write(imgPathOut);
+    }
+    else {
+      // Cover
+      img.clone().contain(w,w).write(imgPathOut);
+    }
+
+    console.log(('('+ w + 'x' + h +' px) : ').cyan + imgPathOut);
   }
   else {
     if(dpiIn >= sizeParams) {

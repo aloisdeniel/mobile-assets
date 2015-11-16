@@ -22,14 +22,19 @@ function shiftColor(img, color2, color1) {
 function colorize(img, color) {
   var rgb = tinycolor(color).toRgb();
   return img.color([
-      { apply: 'lighten', params: [ 100 ] },
       { apply: 'red', params: [ rgb.r ] },
       { apply: 'green', params: [ rgb.g ] },
       { apply: 'blue', params: [ rgb.b ] }
   ]);
 }
 
+function createHex(color) {
+  var c = "0x" + tinycolor(color).toHex() + "00";
+  return parseInt(c,16);
+}
+
 module.exports = {
   colorize: colorize,
-  shiftColor: shiftColor
+  shiftColor: shiftColor,
+  createHex: createHex
 };
