@@ -193,18 +193,26 @@ function convertAsset(imgIn, dpiIn, imgPathOut, convertParams, callback) {
  * Writes an image with the given size or scale.
  */
 function writeImage(img, dpiIn, imgPathOut, sizeParams) {
-  if(Array.isArray(sizeParams)) {
 
-    var w = sizeParams[0];
-    var h = sizeParams[1];
+  if(Array.isArray(sizeParams) || (sizeParams.w && sizeParams.h)) {
 
-    if(w !== h) {
+    var w = Array.isArray(sizeParams) ? sizeParams[0] : sizeParams.w;
+    var h = Array.isArray(sizeParams) ? sizeParams[1] : sizeParams.h;
+
+    if(sizeParams.small && img.small) {
+      img = img.small;
+    }
+    else if(img.big){
+      img = img.big;
+    }
+
+    if(w === h) {
       // Resizing
-      img.clone().resize(w,w).write(imgPathOut);
+      img.clone().resize(w,h).write(imgPathOut);
     }
     else {
       // Cover
-      img.clone().contain(w,w).write(imgPathOut);
+      img.clone().contain(w,h).write(imgPathOut);
     }
 
     console.log(('('+ w + 'x' + h +' px) : ').cyan + imgPathOut);

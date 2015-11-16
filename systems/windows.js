@@ -7,16 +7,8 @@ var path = require('path');
 var changeCase = require('change-case');
 var colorUtils = require('../colors-utils.js');
 
-/*
-* Creates an icon from a mask logo.
-*/
-function createIcon(originalPath, foregroundColor, backgroundColor, callback) {
-
-  var offset = 512;
-
+function createIconWithOffset(offset, originalPath, foregroundColor, backgroundColor, callback) {
   jimp.read(originalPath, function (err, foreground) {
-
-
     if (err) {
       callback(err);
       return;
@@ -34,7 +26,8 @@ function createIcon(originalPath, foregroundColor, backgroundColor, callback) {
       }
 
       try {
-        colorUtils.colorize(foreground.resize(iconSize,iconSize),foregroundColor);
+        colorUtils.colorize(foreground,foregroundColor);
+        foreground.resize(iconSize,iconSize);
         var icon = background.composite(foreground, offset, offset);
         callback(null,icon)
       } catch (e) {
@@ -42,7 +35,33 @@ function createIcon(originalPath, foregroundColor, backgroundColor, callback) {
       }
     });
   });
+}
 
+/*
+* Creates an icon from a mask logo.
+*/
+function createIcon(originalPath, foregroundColor, backgroundColor, callback) {
+
+  createIconWithOffset(512,originalPath, foregroundColor, backgroundColor, function(err,bigIcon) {
+    if (err) {
+      callback(err);
+      return;
+    }
+
+    createIconWithOffset(128,originalPath, foregroundColor, backgroundColor, function(err,smallIcon) {
+      if (err) {
+        callback(err);
+        return;
+      }
+
+      callback(null,{
+        big: bigIcon,
+        small: smallIcon
+      });
+
+    });
+
+  });
 };
 
 /*
@@ -69,11 +88,11 @@ module.exports = {
   createResourceName: createResourceName,
   icons: {
     // Square (Small)
-    "/Icons/{pascalcase}_square-small.scale-100.png" : [71, 71],
-    "/Icons/{pascalcase}_square-small.scale-125.png" : [89, 89],
-    "/Icons/{pascalcase}_square-small.scale-150.png" : [107, 107],
-    "/Icons/{pascalcase}_square-small.scale-200.png" : [142, 142],
-    "/Icons/{pascalcase}_square-small.scale-400.png" : [284, 284],
+    "/Icons/{pascalcase}_square-small.scale-100.png" : { small: true, w: 71, h:71 },
+    "/Icons/{pascalcase}_square-small.scale-125.png" : { small: true, w:89, h:89},
+    "/Icons/{pascalcase}_square-small.scale-150.png" : { small: true, w:107, h:107},
+    "/Icons/{pascalcase}_square-small.scale-200.png" : { small: true, w:142, h:142},
+    "/Icons/{pascalcase}_square-small.scale-400.png" : { small: true, w:284, h:284},
 
     // Square (Medium)
     "/Icons/{pascalcase}_square-medium.scale-100.png" : [150, 150],
@@ -97,15 +116,15 @@ module.exports = {
     "/Icons/{pascalcase}_wide.scale-400.png" : [1240, 600],
 
     // Square (Icon)
-    "/Icons/{pascalcase}_square-icon.scale-100.png" : [44, 44],
-    "/Icons/{pascalcase}_square-icon.scale-125.png" : [55, 55],
-    "/Icons/{pascalcase}_square-icon.scale-150.png" : [66, 66],
-    "/Icons/{pascalcase}_square-icon.scale-200.png" : [88, 88],
-    "/Icons/{pascalcase}_square-icon.scale-400.png" : [176, 176],
-    "/Icons/{pascalcase}_square-icon.targetsize-16.png" : [16, 16],
-    "/Icons/{pascalcase}_square-icon.targetsize-24.png" : [24, 24],
-    "/Icons/{pascalcase}_square-icon.targetsize-48.png" : [48, 48],
-    "/Icons/{pascalcase}_square-icon.targetsize-256.png" : [256, 256],
+    "/Icons/{pascalcase}_square-icon.scale-100.png" : { small: true, w: 44, h:44},
+    "/Icons/{pascalcase}_square-icon.scale-125.png" : { small: true, w: 55, h:55},
+    "/Icons/{pascalcase}_square-icon.scale-150.png" : { small: true, w: 66, h:66},
+    "/Icons/{pascalcase}_square-icon.scale-200.png" : { small: true, w: 88, h:88},
+    "/Icons/{pascalcase}_square-icon.scale-400.png" : { small: true, w: 176, h:176},
+    "/Icons/{pascalcase}_square-icon.targetsize-16.png" : { small: true, w: 16, h:16},
+    "/Icons/{pascalcase}_square-icon.targetsize-24.png" : { small: true, w: 24, h:24},
+    "/Icons/{pascalcase}_square-icon.targetsize-48.png" : { small: true, w: 48, h:48},
+    "/Icons/{pascalcase}_square-icon.targetsize-256.png" : { small: true, w: 256, h:256},
 
     // Store
     "/Icons/{pascalcase}_store.scale-100.png" : [50, 50],
@@ -115,11 +134,11 @@ module.exports = {
     "/Icons/{pascalcase}_store.scale-400.png" : [200, 200],
 
     // Badge
-    "/Icons/{pascalcase}_badge.scale-100.png" : [24, 24],
-    "/Icons/{pascalcase}_badge.scale-125.png" : [30, 30],
-    "/Icons/{pascalcase}_badge.scale-150.png" : [36, 36],
-    "/Icons/{pascalcase}_badge.scale-200.png" : [48, 48],
-    "/Icons/{pascalcase}_badge.scale-400.png" : [96, 96],
+    "/Icons/{pascalcase}_badge.scale-100.png" : { small: true, w: 24, h:24},
+    "/Icons/{pascalcase}_badge.scale-125.png" : { small: true, w: 30, h:30},
+    "/Icons/{pascalcase}_badge.scale-150.png" : { small: true, w: 36, h:36},
+    "/Icons/{pascalcase}_badge.scale-200.png" : { small: true, w: 48, h:48},
+    "/Icons/{pascalcase}_badge.scale-400.png" : { small: true, w: 96, h:96},
 
     // Splashscreen
     "/Icons/{pascalcase}_splashscreen.scale-100.png" : [620, 300],
